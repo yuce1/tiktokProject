@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	service_user "tiktok-go/service/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ type VideoListResponse struct {
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 
-	if _, exist := usersLoginInfo[token]; !exist {
+	if _, exist := service_user.GetUserByToken(token); !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
@@ -32,7 +33,7 @@ func Publish(c *gin.Context) {
 	}
 
 	filename := filepath.Base(data.Filename)
-	user := usersLoginInfo[token]
+	user, _ := service_user.GetUserByToken(token)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {

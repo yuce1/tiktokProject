@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile_air
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    command: sh -c "air"
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=tiktok
+      - DB_PASSWD=secret
+      - DB_NAME=tiktok
+
+  postgres:
+    image: postgres:15.1-alpine
+    volumes:
+      - tiktok-go-pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=tiktok
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=tiktok
+
+volumes:
+  tiktok-go-pg-data:

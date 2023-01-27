@@ -6,9 +6,18 @@ import (
 	"io"
 	"net"
 	"sync"
-
-	"github.com/RaymondCode/simple-demo/controller"
 )
+
+type MessageSendEvent struct {
+	UserId     int64  `json:"user_id,omitempty"`
+	ToUserId   int64  `json:"to_user_id,omitempty"`
+	MsgContent string `json:"msg_content,omitempty"`
+}
+
+type MessagePushEvent struct {
+	FromUserId int64  `json:"user_id,omitempty"`
+	MsgContent string `json:"msg_content,omitempty"`
+}
 
 var chatConnMap = sync.Map{}
 
@@ -44,7 +53,7 @@ func process(conn net.Conn) {
 			continue
 		}
 
-		var event = controller.MessageSendEvent{}
+		var event = MessageSendEvent{}
 		_ = json.Unmarshal(buf[:n], &event)
 		fmt.Printf("Receive Message：%+v\n", event)
 
@@ -61,7 +70,7 @@ func process(conn net.Conn) {
 			continue
 		}
 
-		pushEvent := controller.MessagePushEvent{
+		pushEvent := MessagePushEvent{
 			FromUserId: event.UserId,
 			MsgContent: event.MsgContent,
 		}

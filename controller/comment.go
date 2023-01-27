@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	service_user "tiktok-go/service/user"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,13 +23,13 @@ func CommentAction(c *gin.Context) {
 	token := c.Query("token")
 	actionType := c.Query("action_type")
 
-	if user, exist := usersLoginInfo[token]; exist {
+	if user, exist := service_user.GetUserByToken(token); exist {
 		if actionType == "1" {
 			text := c.Query("comment_text")
 			c.JSON(http.StatusOK, CommentActionResponse{Response: Response{StatusCode: 0},
 				Comment: Comment{
 					Id:         1,
-					User:       user,
+					User:       *RepoUserToCon(user),
 					Content:    text,
 					CreateDate: "05-01",
 				}})

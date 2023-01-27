@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/RaymondCode/simple-demo/controller"
+	"tiktok-go/controller"
+
 	"github.com/gin-gonic/gin"
 )
 
-func initRouter(r *gin.Engine) {
+func initRouter(r *gin.Engine) *gin.Engine {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 
@@ -32,4 +33,6 @@ func initRouter(r *gin.Engine) {
 	apiRouter.GET("/relation/friend/list/", controller.FriendList)
 	apiRouter.GET("/message/chat/", controller.MessageChat)
 	apiRouter.POST("/message/action/", controller.MessageAction)
+
+	return r
 }

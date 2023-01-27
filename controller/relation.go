@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	service_user "tiktok-go/service/user"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +17,7 @@ type UserListResponse struct {
 func RelationAction(c *gin.Context) {
 	token := c.Query("token")
 
-	if _, exist := usersLoginInfo[token]; exist {
+	if _, exist := service_user.GetUserByToken(token); exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 0})
 	} else {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
