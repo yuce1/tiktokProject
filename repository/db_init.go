@@ -23,5 +23,9 @@ func InitDB(dsn string) error {
 	if err != nil {
 		return err
 	}
+	err = db.AutoMigrate(&Video{})
+	if err != nil {
+		return err
+	}
 	return nil
 }

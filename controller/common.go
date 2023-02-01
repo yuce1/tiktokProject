@@ -12,11 +12,25 @@ type Response struct {
 type Video struct {
 	Id            int64  `json:"id,omitempty"`
 	Author        User   `json:"author"`
-	PlayUrl       string `json:"play_url" json:"play_url,omitempty"`
+	PlayUrl       string `json:"play_url,omitempty"`
 	CoverUrl      string `json:"cover_url,omitempty"`
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
+}
+
+func RepoVideoToCon(video *repository.Video) *Video {
+	author, _ := repository.NewUserDaoInstance().GetUserByName(video.Author)
+	return &Video{
+		Id:            video.Id,
+		Author:        *RepoUserToCon(author),
+		PlayUrl:       video.PlayUrl,
+		CoverUrl:      video.CoverUrl,
+		FavoriteCount: video.FavoriteCount,
+		CommentCount:  video.CommentCount,
+		// TODO: favourite list hasnt been develop yet
+		IsFavorite: video.IsFavorite,
+	}
 }
 
 type Comment struct {
