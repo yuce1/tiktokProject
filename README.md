@@ -28,3 +28,8 @@ Fork from [RaymondCode/simple-demo](https://tiktok-go)
 在app中访问上述某个接口时就会拼接该前缀地址，例如访问 http://192.168.1.7:8080/douyin/feed/ 拉取视频列表
 
 在未登录情况下，双击右下角的 “我” 可以 打开高级设置
+
+
+# Notic
+
+在docker-compose.yml中的Host环境变量写入你的服务器地址。

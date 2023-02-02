@@ -8,7 +8,7 @@ import (
 
 // Author可以作为外键
 type Video struct {
-	Id            int64  `gorm:"primary_key" json:"id,omitempty"`
+	Id            int64  `gorm:"primary_key;AUTO_INCREMENT" json:"id,omitempty"`
 	Author        string `json:"author"`
 	PlayUrl       string `json:"play_url,omitempty"`
 	CoverUrl      string `json:"cover_url,omitempty"`
