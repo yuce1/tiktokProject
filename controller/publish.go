@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"strconv"
-	"strings"
 	"tiktok-go/repository"
 	service_user "tiktok-go/service/user"
 	service_video "tiktok-go/service/video"
@@ -14,6 +14,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var videoIdSequence = int64(1)
 
 type VideoListResponse struct {
 	Response
@@ -41,7 +43,9 @@ func Publish(c *gin.Context) {
 		return
 	}
 
-	filename := filepath.Base(data.Filename)
+	atomic.AddInt64(&userIdSequence, 1)
+	videoIdstr := strconv.FormatInt(userIdSequence, 10)
+	filename := videoIdstr+ ".mp4"
 	user, _ := service_user.GetUserByToken(token)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
@@ -55,16 +59,11 @@ func Publish(c *gin.Context) {
 
 	// gen cover
 	var (
-		dotPos    int
 		coverFile string
 		coverUrl  string
 	)
 
-	dotPos = strings.LastIndex(data.Filename, ".")
-	if dotPos != -1 {
-		coverFile = string(data.Filename[:dotPos])
-	}
-	coverFile += ".jpg"
+	coverFile = videoIdstr+ ".jpg"
 	finalCover := fmt.Sprintf("%d_%s", user.Id, coverFile)
 	coverErr := utils.GenVideoCover(saveFile, filepath.Join("./public/", finalCover))
 

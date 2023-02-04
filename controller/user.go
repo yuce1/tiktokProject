@@ -7,9 +7,12 @@ import (
 	service_user "tiktok-go/service/user"
 
 	"github.com/gin-gonic/gin"
+
+	"crypto/sha256"
+	"encoding/hex"
 )
 
-var userIdSequence = int64(1)
+var userIdSequence = int64(0)
 
 type UserLoginResponse struct {
 	Response
@@ -22,9 +25,20 @@ type UserResponse struct {
 	User User `json:"user"`
 }
 
+//make sha256hash to protect name and passwd
+func GetSHA256HashCode(message []byte)string{
+	hash := sha256.New()
+	hash.Write(message)
+	bytes := hash.Sum(nil)
+	hashCode := hex.EncodeToString(bytes)
+	return hashCode
+}
+
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
+
+	password = GetSHA256HashCode([]byte(password))
 
 	if exist := service_user.CheckUserExist(username); exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
@@ -45,6 +59,8 @@ func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
+	password = GetSHA256HashCode([]byte(password))
+
 	if user, exist := service_user.GetUserWithVerify(username, password); exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
@@ -53,7 +69,7 @@ func Login(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist or password errors"},
 		})
 	}
 }
