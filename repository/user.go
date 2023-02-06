@@ -67,3 +67,9 @@ func (t *UserDao) GetUserByName(username string) (*User, bool) {
 	result := t.db.Where("name = ?", username).First(&user)
 	return &user, result.RowsAffected == 1
 }
+
+func (t *UserDao) GetUserById(userid int64) (*User, bool) {
+	var user User
+	result := t.db.Where("id = ?", userid).First(&user)
+	return &user, result.RowsAffected == 1
+}

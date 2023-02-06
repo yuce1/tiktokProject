@@ -40,6 +40,16 @@ type Comment struct {
 	CreateDate string `json:"create_date,omitempty"`
 }
 
+func RepoCommentToCon(comment *repository.Comment) *Comment {
+	author, _ := repository.NewUserDaoInstance().GetUserById(comment.UserId)
+	return &Comment{
+		Id:            comment.Id,
+		User:		   *RepoUserToCon(author),
+		Content:       comment.Content,
+		CreateDate:    comment.CreateDate,
+	}
+}
+
 type User struct {
 	Id            int64  `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`

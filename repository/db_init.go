@@ -27,5 +27,9 @@ func InitDB(dsn string) error {
 	if err != nil {
 		return err
 	}
+	err = db.AutoMigrate(&Comment{})
+	if err != nil {
+		return err
+	}
 	return nil
 }
