@@ -3,7 +3,19 @@ package user
 import (
 	"strings"
 	"tiktok-go/repository"
+
+	"crypto/sha256"
+	"encoding/hex"
 )
+
+//make sha256hash to protect name and passwd
+func GetSHA256HashCode(message []byte)string{
+	hash := sha256.New()
+	hash.Write(message)
+	bytes := hash.Sum(nil)
+	hashCode := hex.EncodeToString(bytes)
+	return hashCode
+}
 
 func CheckUserExist(username string) bool {
 	return repository.NewUserDaoInstance().CheckUserExist(username)

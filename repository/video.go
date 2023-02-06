@@ -15,10 +15,10 @@ type Video struct {
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
-
 	CreatedAt int64 `json:"created_at,omitempty"`
 	UpdatedAt int64 `json:"updated_at,omitempty"`
 	DeleteAt  int64 `json:"delete_at,omitempty"`
+	HashCode  string `json:"hash_code,omitempty"`
 }
 
 type VideoDao struct {
@@ -59,5 +59,11 @@ func (v *VideoDao) GetVideosByAuthor(username string) (*[]Video, error) {
 func (v *VideoDao) GetVideoList(timeStamp int64) (*[]Video, error) {
 	var video []Video
 	res := v.db.Where("created_at <= ?", timeStamp).Order("created_at DESC").Limit(30).Find(&video)
+	return &video, res.Error
+}
+
+func (v *VideoDao) CheckVideoHash(hash_code string) (*Video, error) {
+	var video Video
+	res := v.db.Where("hash_code = ?", hash_code).First(&video)
 	return &video, res.Error
 }

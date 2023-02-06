@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sync/atomic"
 	"strconv"
 	"tiktok-go/repository"
 	service_user "tiktok-go/service/user"
@@ -14,8 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var videoIdSequence = int64(1)
 
 type VideoListResponse struct {
 	Response
@@ -43,9 +40,30 @@ func Publish(c *gin.Context) {
 		return
 	}
 
-	atomic.AddInt64(&userIdSequence, 1)
-	videoIdstr := strconv.FormatInt(userIdSequence, 10)
-	filename := videoIdstr+ ".mp4"
+	//chech if the video was published
+	var byteContainer []byte
+	byteContainer = make([]byte, 1000000)
+	fileContent, _ := data.Open()
+	fileContent.Read(byteContainer)
+	hash_code := service_user.GetSHA256HashCode([]byte(byteContainer))
+	_, err = service_video.CheckVideo(hash_code);
+	if err != nil{
+		if err.Error() != "record not found"{
+			c.JSON(http.StatusOK, Response{
+				StatusCode: 2,
+				StatusMsg:  err.Error(),
+			})
+			return
+		}
+	}else{
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 3,
+			StatusMsg:  "video had been publish before",
+		})
+		return
+	}
+
+	filename := hash_code+ ".mp4"
 	user, _ := service_user.GetUserByToken(token)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
@@ -63,7 +81,7 @@ func Publish(c *gin.Context) {
 		coverUrl  string
 	)
 
-	coverFile = videoIdstr+ ".jpg"
+	coverFile = hash_code+ ".jpg"
 	finalCover := fmt.Sprintf("%d_%s", user.Id, coverFile)
 	coverErr := utils.GenVideoCover(saveFile, filepath.Join("./public/", finalCover))
 
@@ -80,6 +98,7 @@ func Publish(c *gin.Context) {
 		Author:   user.Name,
 		PlayUrl:  videoUrl,
 		CoverUrl: coverUrl,
+		HashCode: hash_code,
 	}
 
 	// need remove the file which insert faild?
