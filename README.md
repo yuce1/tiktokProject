@@ -42,3 +42,15 @@ Fork from [RaymondCode/simple-demo](https://tiktok-go)
 视频上传
 
 公共视频流
+
+# 关注粉丝
+
+关注操作
+
+取消关注操作
+
+拉取粉丝列表
+
+拉取关注列表
+
+粉丝关注去重操作
