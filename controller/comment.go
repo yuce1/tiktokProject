@@ -3,13 +3,14 @@ package controller
 import (
 	"net/http"
 
-	service_user "tiktok-go/service/user"
-	service_comment "tiktok-go/service/comment"
 	"tiktok-go/repository"
+	service_comment "tiktok-go/service/comment"
+	service_user "tiktok-go/service/user"
+
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"time"
-	"strconv"
 )
 
 type CommentListResponse struct {
@@ -28,35 +29,40 @@ func CommentAction(c *gin.Context) {
 	actionType := c.Query("action_type")
 
 	if user, exist := service_user.GetUserByToken(token); exist {
+		// Add Comment
 		if actionType == "1" {
-			timeStr:=time.Now().Format("2006-01-02 15:04:05")
+			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			text := c.Query("comment_text")
 			videoidstr := c.Query("video_id")
 			videoid, _ := strconv.ParseInt(videoidstr, 10, 64)
-			c.JSON(http.StatusOK, CommentActionResponse{Response: Response{StatusCode: 0},
+
+			comment := &repository.Comment{
+				UserId:     user.Id,
+				VideoId:    videoid,
+				Content:    text,
+				CreateDate: timeStr,
+			}
+
+			service_comment.PublishComment(comment)
+
+			c.JSON(http.StatusOK, CommentActionResponse{Response: Response{StatusCode: 0, StatusMsg: "publish successfully"},
 				Comment: Comment{
-					Id:         1,
+					Id:         comment.Id,
 					User:       *RepoUserToCon(user),
 					Content:    text,
 					CreateDate: timeStr,
-				}})
-				
-			comment := &repository.Comment{
-				UserId:   user.Id,
-				VideoId:  videoid,
-				Content: text,
-				CreateDate: timeStr,
-			}
-			
-			service_comment.PublishComment(comment)
+				},
+			})
+			return
+		} else { // Delete Comment
+			commentidstr := c.Query("comment_id")
+			commentid, _ := strconv.ParseInt(commentidstr, 10, 64)
+
+			service_comment.DeleteComment(commentid)
+			c.JSON(http.StatusOK, Response{StatusCode: 0})
 			return
 		}
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 0,
-			StatusMsg:  "publish successfully",
-		})
 
-		//c.JSON(http.StatusOK, Response{StatusCode: 0})
 	} else {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 	}
@@ -66,8 +72,8 @@ func CommentAction(c *gin.Context) {
 func CommentList(c *gin.Context) {
 	videoidstr := c.Query("video_id")
 	videoid, _ := strconv.ParseInt(videoidstr, 10, 64)
-	comments,err := service_comment.GetCommentByVideoId(videoid)
-	if err!=nil{
+	comments, err := service_comment.GetCommentByVideoId(videoid)
+	if err != nil {
 		c.JSON(http.StatusOK, CommentListResponse{
 			Response: Response{
 				StatusCode: 1,

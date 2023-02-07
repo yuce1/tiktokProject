@@ -31,5 +31,9 @@ func InitDB(dsn string) error {
 	if err != nil {
 		return err
 	}
+	err = db.AutoMigrate(&Relation{})
+	if err != nil {
+		return err
+	}
 	return nil
 }

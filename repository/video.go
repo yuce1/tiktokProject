@@ -15,10 +15,10 @@ type Video struct {
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
-	CreatedAt int64 `json:"created_at,omitempty"`
-	UpdatedAt int64 `json:"updated_at,omitempty"`
-	DeleteAt  int64 `json:"delete_at,omitempty"`
-	HashCode  string `json:"hash_code,omitempty"`
+	CreatedAt     int64  `json:"created_at,omitempty"`
+	UpdatedAt     int64  `json:"updated_at,omitempty"`
+	DeleteAt      int64  `json:"delete_at,omitempty"`
+	HashCode      string `json:"hash_code,omitempty"`
 }
 
 type VideoDao struct {
@@ -66,4 +66,17 @@ func (v *VideoDao) CheckVideoHash(hash_code string) (*Video, error) {
 	var video Video
 	res := v.db.Where("hash_code = ?", hash_code).First(&video)
 	return &video, res.Error
+}
+
+func (v *VideoDao) UpdateCommentCount(videoid int64, op int) error {
+	var video Video
+	res := v.db.Where("id = ?", videoid).First(&video)
+	if op == 1 {
+		video.CommentCount += 1
+	} else {
+		video.CommentCount -= 1
+	}
+
+	v.db.Save(&video)
+	return res.Error
 }

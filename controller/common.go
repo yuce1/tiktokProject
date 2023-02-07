@@ -43,10 +43,10 @@ type Comment struct {
 func RepoCommentToCon(comment *repository.Comment) *Comment {
 	author, _ := repository.NewUserDaoInstance().GetUserById(comment.UserId)
 	return &Comment{
-		Id:            comment.Id,
-		User:		   *RepoUserToCon(author),
-		Content:       comment.Content,
-		CreateDate:    comment.CreateDate,
+		Id:         comment.Id,
+		User:       *RepoUserToCon(author),
+		Content:    comment.Content,
+		CreateDate: comment.CreateDate,
 	}
 }
 
