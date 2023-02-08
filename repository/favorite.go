@@ -2,18 +2,18 @@ package repository
 
 import (
 	"sync"
-	"time"
 
 	"gorm.io/gorm"
 )
 
+// TODO: turn this table to composite primary key
+
 type Favorite struct {
-	Id        int64 `gorm:"primary_key" json:"id,omitempty"`
-	UserId    int64 `json:"user_id,omitempty"`
-	VideoId   int64 `json:"video_id,omitempty"`
-	CreatedAt int64 `json:"created_at,omitempty"`
-	UpdatedAt int64 `json:"updated_at,omitempty"`
-	DeleteAt  int64 `json:"delete_at,omitempty"`
+	UserId    int64          `gorm:"primary_key;autoIncrement:false" json:"user_id,omitempty"`
+	VideoId   int64          `gorm:"primary_key;autoIncrement:false" json:"video_id,omitempty"`
+	CreatedAt int64          `json:"created_at,omitempty"`
+	UpdatedAt int64          `json:"updated_at,omitempty"`
+	DeleteAt  gorm.DeletedAt `json:"delete_at,omitempty"`
 }
 
 type FavoriteDao struct {
@@ -63,41 +63,30 @@ func NewFavourite(option ...FavouriteOption) *Favorite {
 // Use a struct as paramter will add code complx or prefermence influence?
 
 func (dao *FavoriteDao) Create(f *Favorite) error {
-	return dao.db.Create(f).Error
+
+	var resFavorite Favorite
+	result := dao.db.Unscoped().Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).First(&resFavorite)
+
+	if result.Error != nil {
+		return dao.db.Create(f).Error
+	}
+
+	if resFavorite.DeleteAt.Valid {
+		// Valid is true mean this record was delete
+		resFavorite.DeleteAt = gorm.DeletedAt{Valid: false}
+		return dao.db.Save(&resFavorite).Error
+	}
+
+	return nil
 }
 
 func (dao *FavoriteDao) Delete(f *Favorite) error {
-
-	t := time.Now().Unix()
-
-	err := dao.db.Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).Delete(&Favorite{}).Error
-
-	if err == nil {
-		// consist for record and var
-		f.DeleteAt = t
-	}
-
-	return err
+	return dao.db.Delete(f).Error
 }
 
-func (dao *FavoriteDao) SoftDelete(f *Favorite) error {
-
-	t := time.Now().Unix()
-
-	err := dao.db.Model(&Favorite{}).Where(
-		"user_id = ? and video_id = ?",
-		f.UserId, f.VideoId,
-	).Update("delete_at", t).Error
-
-	if err == nil {
-		f.DeleteAt = t
-	}
-
-	return err
-}
-
-func (dao *FavoriteDao) CheckFavouriteExist(f *Favorite) bool {
-	return dao.db.Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).First(&Favorite{}).Error == nil
+func (dao *FavoriteDao) GetDesignedFavourite(f *Favorite) error {
+	result := dao.db.Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).First(&Favorite{})
+	return result.Error
 }
 
 func (dao *FavoriteDao) ListFavouriteByUserId(userId int64) (*[]Favorite, error) {
