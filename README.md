@@ -50,8 +50,8 @@ Fork from [RaymondCode/simple-demo](https://tiktok-go)
 
 互动接口：
 
-* 赞操作
-* 喜欢列表     
+* 赞操作       已完成，未测试
+* 喜欢列表     已完成，未测试
 * 评论操作     已完成，未测试
 * 评论列表     已完成，未测试
 
@@ -64,3 +64,7 @@ Fork from [RaymondCode/simple-demo](https://tiktok-go)
 * 发送消息
 * 聊天记录
 
+待加入中间件：
+
+* Redis
+* JWT

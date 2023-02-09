@@ -6,6 +6,7 @@ import (
 	"tiktok-go/repository"
 	service_favor "tiktok-go/service/favorite"
 	service_user "tiktok-go/service/user"
+	service_video "tiktok-go/service/video"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,10 +47,74 @@ func FavoriteAction(c *gin.Context) {
 
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
+
+	var (
+		id  int64
+		err error
+	)
+
+	token := c.Query("token")
+	if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "Invaild user id",
+			},
+			VideoList: nil,
+		})
+		return
+	}
+
+	u, exist := service_user.GetUserByToken(token)
+	if !exist || u.Id != id {
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 2,
+				StatusMsg:  "User authenticate fail.",
+			},
+			VideoList: nil,
+		})
+		return
+	}
+
+	favors, err := service_favor.ListByUserId(u.Id)
+	if err != nil {
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 3,
+				StatusMsg:  "Fetch favorite list faild.",
+			},
+			VideoList: nil,
+		})
+		return
+	}
+
+	videoIds := make([]int64, len(*favors))
+	for _, f := range *favors {
+		videoIds = append(videoIds, f.VideoId)
+	}
+
+	videos, err := service_video.GetVideoBySet(videoIds)
+	if err != nil {
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 3,
+				StatusMsg:  "Fetch favorite list faild.",
+			},
+			VideoList: nil,
+		})
+		return
+	}
+
+	var respVideoList []Video
+	for _, video := range *videos {
+		respVideoList = append(respVideoList, *RepoVideoToCon(&video))
+	}
+
 	c.JSON(http.StatusOK, VideoListResponse{
 		Response: Response{
 			StatusCode: 0,
 		},
-		VideoList: DemoVideos,
+		VideoList: respVideoList,
 	})
 }
