@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"tiktok-go/repository"
@@ -22,7 +23,9 @@ func FavoriteAction(c *gin.Context) {
 	token := c.Query("token")
 
 	if u, exist = service_user.GetUserByToken(token); !exist {
+		log.Printf("[WARN] Request User (token: %s) doesn't exist", token)
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		return
 	}
 
 	// are there need a video legal verify?
@@ -41,8 +44,10 @@ func FavoriteAction(c *gin.Context) {
 	}
 
 	if err != nil {
+		log.Printf("[WARN] Favourite action on User[id: %d] faild, ERR: %s", u.Id, err)
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Action faild."})
 	}
+	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "Success"})
 }
 
 // FavoriteList all users have same favorite video list
@@ -55,6 +60,7 @@ func FavoriteList(c *gin.Context) {
 
 	token := c.Query("token")
 	if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+		log.Printf("[WARN] Request UserID is invaild, User[id: %d]", id)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 1,
@@ -67,6 +73,7 @@ func FavoriteList(c *gin.Context) {
 
 	u, exist := service_user.GetUserByToken(token)
 	if !exist || u.Id != id {
+		log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild.", id)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 2,
@@ -79,6 +86,7 @@ func FavoriteList(c *gin.Context) {
 
 	favors, err := service_favor.ListByUserId(u.Id)
 	if err != nil {
+		log.Printf("[WARN] User[id: %d] Fetch favourite list faild, ERR: %s.", id, err)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 3,
@@ -96,6 +104,7 @@ func FavoriteList(c *gin.Context) {
 
 	videos, err := service_video.GetVideoBySet(videoIds)
 	if err != nil {
+		log.Printf("[WARN] User[id: %d] Fetch favourite list faild, ERR: %s.", id, err)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 3,
@@ -112,6 +121,13 @@ func FavoriteList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, VideoListResponse{
+		Response: Response{
+			StatusCode: 0,
+		},
+		VideoList: respVideoList,
+	})
+
+	log.Printf("%#v", VideoListResponse{
 		Response: Response{
 			StatusCode: 0,
 		},

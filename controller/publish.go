@@ -41,21 +41,20 @@ func Publish(c *gin.Context) {
 	}
 
 	//chech if the video was published
-	var byteContainer []byte
-	byteContainer = make([]byte, 1000000)
+	var byteContainer []byte = make([]byte, 1000000)
 	fileContent, _ := data.Open()
 	fileContent.Read(byteContainer)
 	hash_code := service_user.GetSHA256HashCode([]byte(byteContainer))
-	_, err = service_video.CheckVideo(hash_code);
-	if err != nil{
-		if err.Error() != "record not found"{
+	_, err = service_video.CheckVideo(hash_code)
+	if err != nil {
+		if err.Error() != "record not found" {
 			c.JSON(http.StatusOK, Response{
 				StatusCode: 2,
 				StatusMsg:  err.Error(),
 			})
 			return
 		}
-	}else{
+	} else {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 3,
 			StatusMsg:  "video had been publish before",
@@ -63,7 +62,7 @@ func Publish(c *gin.Context) {
 		return
 	}
 
-	filename := hash_code+ ".mp4"
+	filename := hash_code + ".mp4"
 	user, _ := service_user.GetUserByToken(token)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
@@ -81,7 +80,7 @@ func Publish(c *gin.Context) {
 		coverUrl  string
 	)
 
-	coverFile = hash_code+ ".jpg"
+	coverFile = hash_code + ".jpg"
 	finalCover := fmt.Sprintf("%d_%s", user.Id, coverFile)
 	coverErr := utils.GenVideoCover(saveFile, filepath.Join("./public/", finalCover))
 
