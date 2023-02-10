@@ -126,11 +126,4 @@ func FavoriteList(c *gin.Context) {
 		},
 		VideoList: respVideoList,
 	})
-
-	log.Printf("%#v", VideoListResponse{
-		Response: Response{
-			StatusCode: 0,
-		},
-		VideoList: respVideoList,
-	})
 }
