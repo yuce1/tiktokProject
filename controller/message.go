@@ -27,12 +27,12 @@ func MessageAction(c *gin.Context) {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
-	userIdB, _ := strconv.Atoi(toUserId)
-	chatKey := service_chat.GenChatKey(user.Id, int64(userIdB))
+	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
+	chatKey := service_chat.GenChatKey(user.Id, userIdB)
 	curMessage := repository.ChatRecord{
 		ChatKey:    chatKey,
 		FromUserId: user.Id,
-		ToUserId:   int64(userIdB),
+		ToUserId:   userIdB,
 		Content:    content,
 	}
 	err := service_chat.SaveMsg(&curMessage)
@@ -55,8 +55,8 @@ func MessageChat(c *gin.Context) {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
-	userIdB, _ := strconv.Atoi(toUserId)
-	chatKey := service_chat.GenChatKey(user.Id, int64(userIdB))
+	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
+	chatKey := service_chat.GenChatKey(user.Id, userIdB)
 
 	chatRecord, err := service_chat.GetMsgList(chatKey)
 	if err != nil {
