@@ -17,3 +17,7 @@ func GetVideosByUsername(username string) (*[]repository.Video, error) {
 func GetStreamFeed(timeStamp int64) (*[]repository.Video, error) {
 	return repository.NewVideoDaoInstance().GetVideoList(timeStamp)
 }
+
+func GetVideoBySet(videoIdSet []int64) (*[]repository.Video, error) {
+	return repository.NewVideoDaoInstance().ListByVideoIdSet(videoIdSet)
+}

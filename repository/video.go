@@ -80,3 +80,9 @@ func (v *VideoDao) UpdateCommentCount(videoid int64, op int) error {
 	v.db.Save(&video)
 	return res.Error
 }
+
+func (v *VideoDao) ListByVideoIdSet(idSet []int64) (*[]Video, error) {
+	var videos []Video
+	result := v.db.Where("id in ?", idSet).Find(&videos) 
+	return &videos, result.Error
+}

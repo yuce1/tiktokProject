@@ -6,11 +6,13 @@ import (
 
 	"tiktok-go/repository"
 	"tiktok-go/service"
+	"tiktok-go/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	utils.InitLog()
 	go service.RunMessageServer()
 	dsn_template := "host=%v user=%v password=%v dbname=%v port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	dsn := fmt.Sprintf(
