@@ -114,10 +114,29 @@ func FollowerList(c *gin.Context) {
 
 // FriendList all users have same friend list
 func FriendList(c *gin.Context) {
+	useridstr := c.Query("user_id")
+	userid, _ := strconv.ParseInt(useridstr, 10, 64)
+	follow_relations, err := service_relation.GetFollowListById(userid)
+	if err != nil {
+		c.JSON(http.StatusOK, UserListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "FollowList failed",
+			},
+			UserList: []User{DemoUser},
+		})
+	}
+	var respFriendList []User
+	for _, relation := range *follow_relations {
+		user, _ := repository.NewUserDaoInstance().GetUserById(relation.ToId)
+		if repository.NewRelationDaoInstance().CheckRelation(userid, relation.FromId) {
+			respFriendList = append(respFriendList, *RepoUserToCon(user))
+		}
+	}
 	c.JSON(http.StatusOK, UserListResponse{
 		Response: Response{
 			StatusCode: 0,
 		},
-		UserList: []User{DemoUser},
+		UserList: respFriendList,
 	})
 }
