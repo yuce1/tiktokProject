@@ -2,7 +2,6 @@ package controller
 
 import (
 	"tiktok-go/repository"
-	"time"
 )
 
 type Response struct {
@@ -72,13 +71,13 @@ func RepoUserToCon(user *repository.User) *User {
 type Message struct {
 	Id         int64  `json:"id,omitempty"`
 	Content    string `json:"content,omitempty"`
-	CreateTime string `json:"create_time,omitempty"`
+	CreateTime int64  `json:"create_time,omitempty"`
 }
 
 func RepoChatToMsg(cr *repository.ChatRecord) *Message {
 	return &Message{
 		Id:         cr.Id,
 		Content:    cr.Content,
-		CreateTime: time.Unix(cr.CreatedAt, 0).Format("2006-01-02 15:04:05"),
+		CreateTime: cr.CreatedAt,
 	}
 }

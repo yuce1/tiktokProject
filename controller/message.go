@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"tiktok-go/repository"
@@ -48,6 +49,7 @@ func MessageChat(c *gin.Context) {
 
 	user, exist := service_user.GetUserByToken(token)
 	if !exist {
+		log.Printf("[WARN] User doesn't exist")
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
@@ -56,13 +58,16 @@ func MessageChat(c *gin.Context) {
 
 	chatRecord, err := service_chat.GetMsgList(chatKey)
 	if err != nil {
+		log.Printf("[WARN] Fetch chat list faild. %s", err)
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Fetch chat list faild."})
 		return
 	}
 	resp := make([]Message, len(*chatRecord))
-	for _, obj := range *chatRecord {
-		resp = append(resp, *RepoChatToMsg(&obj))
+	for i, obj := range *chatRecord {
+		resp[i] = *RepoChatToMsg(&obj)
 	}
-
+	log.Println(len(*chatRecord))
+	log.Println(len(resp))
+	log.Println(resp)
 	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: resp})
 }
