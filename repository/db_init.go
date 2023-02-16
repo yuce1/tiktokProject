@@ -50,6 +50,11 @@ func InitDB(dsn string) error {
 		log.Printf("[ERROR] %s", err)
 		return err
 	}
+	err = db.AutoMigrate(&ChatRecord{})
+	if err != nil {
+		log.Printf("[ERROR] %s", err)
+		return err
+	}
 
 	return nil
 }
