@@ -30,8 +30,10 @@ func MessageAction(c *gin.Context) {
 	userIdB, _ := strconv.Atoi(toUserId)
 	chatKey := service_chat.GenChatKey(user.Id, int64(userIdB))
 	curMessage := repository.ChatRecord{
-		ChatKey: chatKey,
-		Content: content,
+		ChatKey:    chatKey,
+		FromUserId: user.Id,
+		ToUserId:   int64(userIdB),
+		Content:    content,
 	}
 	err := service_chat.SaveMsg(&curMessage)
 	if err != nil {
@@ -66,8 +68,6 @@ func MessageChat(c *gin.Context) {
 	for i, obj := range *chatRecord {
 		resp[i] = *RepoChatToMsg(&obj)
 	}
-	log.Println(len(*chatRecord))
-	log.Println(len(resp))
-	log.Println(resp)
+
 	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: resp})
 }

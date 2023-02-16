@@ -70,6 +70,8 @@ func RepoUserToCon(user *repository.User) *User {
 
 type Message struct {
 	Id         int64  `json:"id,omitempty"`
+	FromUserId int64  `json:"from_user_id"`
+	ToUserId   int64  `json:"to_user_id"`
 	Content    string `json:"content,omitempty"`
 	CreateTime int64  `json:"create_time,omitempty"`
 }
@@ -77,6 +79,8 @@ type Message struct {
 func RepoChatToMsg(cr *repository.ChatRecord) *Message {
 	return &Message{
 		Id:         cr.Id,
+		FromUserId: cr.FromUserId,
+		ToUserId:   cr.ToUserId,
 		Content:    cr.Content,
 		CreateTime: cr.CreatedAt,
 	}
