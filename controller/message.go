@@ -1,19 +1,14 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
-	"sync/atomic"
+	"tiktok-go/repository"
+	service_chat "tiktok-go/service/chat"
 	service_user "tiktok-go/service/user"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-var tempChat = map[string][]Message{}
-
-var messageIdSequence = int64(1)
 
 type ChatResponse struct {
 	Response
@@ -26,26 +21,24 @@ func MessageAction(c *gin.Context) {
 	toUserId := c.Query("to_user_id")
 	content := c.Query("content")
 
-	if user, exist := service_user.GetUserByToken(token); exist {
-		userIdB, _ := strconv.Atoi(toUserId)
-		chatKey := genChatKey(user.Id, int64(userIdB))
-
-		atomic.AddInt64(&messageIdSequence, 1)
-		curMessage := Message{
-			Id:         messageIdSequence,
-			Content:    content,
-			CreateTime: time.Now().Format(time.Kitchen),
-		}
-
-		if messages, exist := tempChat[chatKey]; exist {
-			tempChat[chatKey] = append(messages, curMessage)
-		} else {
-			tempChat[chatKey] = []Message{curMessage}
-		}
-		c.JSON(http.StatusOK, Response{StatusCode: 0})
-	} else {
+	user, exist := service_user.GetUserByToken(token)
+	if !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		return
 	}
+	userIdB, _ := strconv.Atoi(toUserId)
+	chatKey := service_chat.GenChatKey(user.Id, int64(userIdB))
+	curMessage := repository.ChatRecord{
+		ChatKey: chatKey,
+		Content: content,
+	}
+	err := service_chat.SaveMsg(&curMessage)
+	if err != nil {
+		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Save chat record faild."})
+		return
+	}
+
+	c.JSON(http.StatusOK, Response{StatusCode: 0})
 }
 
 // MessageChat all users have same follow list
@@ -53,19 +46,23 @@ func MessageChat(c *gin.Context) {
 	token := c.Query("token")
 	toUserId := c.Query("to_user_id")
 
-	if user, exist := service_user.GetUserByToken(token); exist {
-		userIdB, _ := strconv.Atoi(toUserId)
-		chatKey := genChatKey(user.Id, int64(userIdB))
-
-		c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: tempChat[chatKey]})
-	} else {
+	user, exist := service_user.GetUserByToken(token)
+	if !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		return
 	}
-}
+	userIdB, _ := strconv.Atoi(toUserId)
+	chatKey := service_chat.GenChatKey(user.Id, int64(userIdB))
 
-func genChatKey(userIdA int64, userIdB int64) string {
-	if userIdA > userIdB {
-		return fmt.Sprintf("%d_%d", userIdB, userIdA)
+	chatRecord, err := service_chat.GetMsgList(chatKey)
+	if err != nil {
+		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Fetch chat list faild."})
+		return
 	}
-	return fmt.Sprintf("%d_%d", userIdA, userIdB)
+	resp := make([]Message, len(*chatRecord))
+	for _, obj := range *chatRecord {
+		resp = append(resp, *RepoChatToMsg(&obj))
+	}
+
+	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: resp})
 }
