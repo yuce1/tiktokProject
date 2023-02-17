@@ -14,9 +14,13 @@ type User struct {
 	UpdatedAt int64  `json:"updated_at,omitempty"`
 	DeleteAt  int64  `json:"delete_at,omitempty"`
 
+	WorkCount     int64 `json:"work_count"`
+	FavoriteCount int64 `json:"favorite_count"`
 	FollowCount   int64 `json:"follow_count"`
 	FollowerCount int64 `json:"follower_count"`
-	IsFollow      bool  `json:"is_follow"`
+	// TODO: remove this field in db, this field should consider with other single user
+	// But there is some code is using this field
+	IsFollow bool `json:"is_follow"`
 }
 
 func NewUser() *User {
@@ -72,4 +76,16 @@ func (t *UserDao) GetUserById(userid int64) (*User, bool) {
 	var user User
 	result := t.db.Where("id = ?", userid).First(&user)
 	return &user, result.RowsAffected == 1
+}
+
+func (t *UserDao) UpdateWorkCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("work_count", gorm.Expr("work_count + ?", action))
+	return result.Error
+}
+
+func (t *UserDao) UpdateFavoriteCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("favorite_count", gorm.Expr("favorite_count + ?", action))
+	return result.Error
 }

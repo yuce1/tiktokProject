@@ -38,9 +38,9 @@ func FavoriteAction(c *gin.Context) {
 
 	switch actioType {
 	case "1":
-		err = service_favor.Do(&favour)
+		err = service_favor.Do(&favour, u.Id)
 	case "2":
-		err = service_favor.Undo(&favour)
+		err = service_favor.Undo(&favour, u.Id)
 	}
 
 	if err != nil {
@@ -73,7 +73,7 @@ func FavoriteList(c *gin.Context) {
 
 	u, exist := service_user.GetUserByToken(token)
 	if !exist || u.Id != id {
-		log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild.", id)
+		log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild. [!exist = %t, (u.ID == id) = %t]", id, !exist, u.Id != id)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 2,
