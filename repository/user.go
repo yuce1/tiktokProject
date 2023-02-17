@@ -77,3 +77,15 @@ func (t *UserDao) GetUserById(userid int64) (*User, bool) {
 	result := t.db.Where("id = ?", userid).First(&user)
 	return &user, result.RowsAffected == 1
 }
+
+func (t *UserDao) UpdateWorkCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("work_count", gorm.Expr("work_count + ?", action))
+	return result.Error
+}
+
+func (t *UserDao) UpdateFavoriteCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("favorite_count", gorm.Expr("favorite_count + ?", action))
+	return result.Error
+}

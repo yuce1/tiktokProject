@@ -38,9 +38,9 @@ func FavoriteAction(c *gin.Context) {
 
 	switch actioType {
 	case "1":
-		err = service_favor.Do(&favour)
+		err = service_favor.Do(&favour, u.Id)
 	case "2":
-		err = service_favor.Undo(&favour)
+		err = service_favor.Undo(&favour, u.Id)
 	}
 
 	if err != nil {

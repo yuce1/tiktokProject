@@ -67,11 +67,6 @@ func (dao *FavoriteDao) Delete(f *Favorite) error {
 	return dao.db.Delete(f).Error
 }
 
-// func (dao *FavoriteDao) GetDesignedFavourite(f *Favorite) error {
-// 	result := dao.db.Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).First(&Favorite{})
-// 	return result.Error
-// }
-
 func (dao *FavoriteDao) ListFavouriteByUserId(userId int64) (*[]Favorite, error) {
 	var f []Favorite
 	result := dao.db.Where("user_id = ?", userId).Find(&f)

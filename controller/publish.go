@@ -26,7 +26,12 @@ func Publish(c *gin.Context) {
 
 	token := c.PostForm("token")
 
-	if _, exist := service_user.GetUserByToken(token); !exist {
+	var (
+		u     *repository.User
+		exist bool
+	)
+
+	if u, exist = service_user.GetUserByToken(token); !exist {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
 		return
 	}
@@ -104,7 +109,7 @@ func Publish(c *gin.Context) {
 	// if err = service_video.PublishVideo(video); err != nil {
 	// upload file can overwrite, not need to processing require
 	// }
-	service_video.PublishVideo(video)
+	service_video.PublishVideo(video, u.Id)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,

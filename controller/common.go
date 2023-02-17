@@ -109,3 +109,6 @@ func RepoUserToInfo(u *repository.User) *UserInfoResp {
 		IsFollow:      true,
 	}
 }
+
+// maybe we can change the message struct to this Info struct, as same as the  struct in repo.
+// and in marshal, we can choose dont marshal the work_count and favorite_count field, to match the response Message struct for response.

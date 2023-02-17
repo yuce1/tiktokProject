@@ -20,8 +20,19 @@ type FeedResponse struct {
 // Feed same demo video list for every request
 func Feed(c *gin.Context) {
 
-	// gin will give a default timestamp
-	timeStamp, err := strconv.ParseInt(c.Query("latest_time"), 10, 64)
+	var (
+		err       error
+		timeStamp int64
+	)
+
+	// gin will give a default timeStr but test not, so there need a verify and attach a default timeStr
+	timeStr := c.Query("latest_time")
+	if timeStr != "" {
+		timeStamp, err = strconv.ParseInt(timeStr, 10, 64)
+	} else {
+		timeStamp = time.Now().Unix()
+	}
+
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{

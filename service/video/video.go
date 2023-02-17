@@ -1,9 +1,11 @@
 package video
 
-import "tiktok-go/repository"
+import (
+	"tiktok-go/repository"
+)
 
-func PublishVideo(video *repository.Video) error {
-	return repository.NewVideoDaoInstance().CreateVideo(video)
+func PublishVideo(video *repository.Video, userid int64) error {
+	return repository.TransacCreateVideoUpdateWorkCount(video, userid, repository.ACTION_CREATE)
 }
 
 func CheckVideo(hash_code string) (*repository.Video, error) {
