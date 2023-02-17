@@ -85,3 +85,27 @@ func RepoChatToMsg(cr *repository.ChatRecord) *Message {
 		CreateTime: cr.CreatedAt,
 	}
 }
+
+// a struct for query self info, due to add work_count & favorite_count fields
+type UserInfoResp struct {
+	Id            int64  `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	FollowCount   int64  `json:"follow_count,omitempty"`
+	FollowerCount int64  `json:"follower_count,omitempty"`
+	WorkCount     int64  `json:"work_count"`
+	FavoriteCount int64  `json:"favorite_count"`
+	IsFollow      bool   `json:"is_follow,omitempty"`
+}
+
+// a func turn repo.user to UserInfoResp
+func RepoUserToInfo(u *repository.User) *UserInfoResp {
+	return &UserInfoResp{
+		Id:            u.Id,
+		Name:          u.Name,
+		FollowCount:   u.FollowCount,
+		FollowerCount: u.FollowerCount,
+		WorkCount:     u.WorkCount,
+		FavoriteCount: u.FavoriteCount,
+		IsFollow:      true,
+	}
+}
