@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -66,19 +67,25 @@ func (j *JWT) ParseToken(tk string) (*jwt.Token, error) {
 // It will pass the  userid to the next func
 func Verify(c *gin.Context) {
 
+	// should we create two func, one for Query and one for PostForm?
 	var tk string
 	if tk = c.PostForm("token"); tk == "" {
 		if tk = c.Query("token"); tk == "" {
+			c.Set("TokenProvide", false)
 			return // no token provide
 		}
 	}
 	result, _ := NewInstance().ParseToken(tk)
 
 	if !result.Valid {
-		c.AbortWithStatus(http.StatusForbidden)
+		c.AbortWithStatus(http.StatusForbidden) // invaild token
+
+		log.Printf("[WARN] Invaild JWT : %s", tk)
+
 		return
 	}
 
+	c.Set("TokenProvide", true)
 	c.Set("UserID", result.Claims.(*Claim).User)
 
 }

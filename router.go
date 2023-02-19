@@ -2,6 +2,7 @@ package main
 
 import (
 	"tiktok-go/controller"
+	"tiktok-go/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,9 @@ func initRouter(r *gin.Engine) *gin.Engine {
 	r.Static("/static", "./public")
 
 	apiRouter := r.Group("/douyin")
+
+	// register middleware
+	apiRouter.Use(jwt.Verify)
 
 	// basic apis
 	apiRouter.GET("/feed/", controller.Feed)

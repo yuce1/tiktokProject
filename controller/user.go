@@ -1,15 +1,13 @@
 package controller
 
 import (
+	"log"
 	"net/http"
-	"sync/atomic"
 
 	service_user "tiktok-go/service/user"
 
 	"github.com/gin-gonic/gin"
 )
-
-var userIdSequence = int64(0)
 
 type UserLoginResponse struct {
 	Response
@@ -33,13 +31,13 @@ func Register(c *gin.Context) {
 			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
 		})
 	} else {
-		atomic.AddInt64(&userIdSequence, 1)
-		service_user.RegisterUser(username, password)
+		id, token, _ := service_user.RegisterUser(username, password)
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
-			UserId:   userIdSequence,
-			Token:    service_user.GenerateToken(username, password),
+			UserId:   id,
+			Token:    token,
 		})
+		log.Printf("[INFO] User: {ID: %d, NAME: %s, PASS: %s} is CREATE", id, username, password)
 	}
 }
 
@@ -53,8 +51,11 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   user.Id,
-			Token:    service_user.GenerateToken(username, password),
+			Token:    service_user.GenerateToken(user.Id),
 		})
+
+		log.Printf("[INFO] User: {ID: %d, NAME: %s, PASS: %s} is LOGIN", user.Id, user.Name, user.Passwd)
+
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist or password errors"},
@@ -63,15 +64,17 @@ func Login(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	token := c.Query("token")
-	if user, exist := service_user.GetUserByToken(token); exist {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 0},
-			User:     *RepoUserToInfo(user),
-		})
-	} else {
+	if c.GetBool("TokenProvide") {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist or token invalid"},
 		})
 	}
+
+	id := c.GetInt64("UserID")
+	user, _ := service_user.GetUserbyId(id)
+
+	c.JSON(http.StatusOK, UserResponse{
+		Response: Response{StatusCode: 0},
+		User:     *RepoUserToInfo(user),
+	})
 }

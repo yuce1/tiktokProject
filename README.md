@@ -67,4 +67,4 @@ Fork from [RaymondCode/simple-demo](https://tiktok-go)
 待加入中间件：
 
 * Redis
-* JWT          已完成模块，未接入gin
+* JWT          已完成模块，评论和关系还没有接入。视频流没有做用户区分。
