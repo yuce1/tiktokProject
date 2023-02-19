@@ -24,11 +24,6 @@ func Publish(c *gin.Context) {
 
 	// TODO: file path tidy
 
-	var (
-		u *repository.User
-		// exist bool
-	)
-
 	// if there request is a Visitor request, I can't be upload
 	if c.GetBool("Visitor") {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "Token not provide"})
@@ -111,7 +106,7 @@ func Publish(c *gin.Context) {
 	// if err = service_video.PublishVideo(video); err != nil {
 	// upload file can overwrite, not need to processing require
 	// }
-	service_video.PublishVideo(video, u.Id)
+	service_video.PublishVideo(video, user.Id)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
