@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"tiktok-go/repository"
 	service_user "tiktok-go/service/user"
 	service_video "tiktok-go/service/video"
@@ -28,7 +29,8 @@ func Publish(c *gin.Context) {
 		// exist bool
 	)
 
-	if c.GetBool("TokenProvide") {
+	// if there request is a Visitor request, I can't be upload
+	if c.GetBool("Visitor") {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "Token not provide"})
 		return
 	}
@@ -117,7 +119,6 @@ func Publish(c *gin.Context) {
 	})
 }
 
-// TODO: visitor request need be impl
 // PublishList all users have same publish video list
 func PublishList(c *gin.Context) {
 
@@ -127,9 +128,21 @@ func PublishList(c *gin.Context) {
 	var (
 		err    error
 		videos *[]repository.Video
+		id     int64
 	)
 
-	id := c.GetInt64("UserID")
+	if c.GetBool("Visitor") { // the visitor can see the publish list
+		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: Response{
+					StatusCode: http.StatusOK,
+					StatusMsg:  "Invaild user id",
+				},
+			})
+		}
+	} else {
+		id = c.GetInt64("UserID")
+	}
 
 	u, exist := service_user.GetUserbyId(id)
 	if !exist || u.Id != id {

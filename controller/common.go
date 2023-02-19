@@ -29,9 +29,8 @@ func RepoVideoToCon(video *repository.Video) *Video {
 		CoverUrl:      video.CoverUrl,
 		FavoriteCount: video.FavoriteCount,
 		CommentCount:  video.CommentCount,
-		// TODO: favourite list hasnt been develop yet
-		IsFavorite: video.IsFavorite,
-		Title:      video.Title,
+		IsFavorite:    video.IsFavorite,
+		Title:         video.Title,
 	}
 }
 

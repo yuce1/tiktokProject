@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	service_user "tiktok-go/service/user"
 
@@ -64,17 +65,29 @@ func Login(c *gin.Context) {
 }
 
 func UserInfo(c *gin.Context) {
-	if c.GetBool("TokenProvide") {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist or token invalid"},
-		})
+
+	var (
+		id  int64
+		err error
+	)
+
+	if c.GetBool("Visitor") { // the visitor can see all the info in person page
+		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: Response{
+					StatusCode: http.StatusOK,
+					StatusMsg:  "Invaild user id",
+				},
+			})
+		}
+	} else {
+		id = c.GetInt64("UserID")
 	}
 
-	id := c.GetInt64("UserID")
 	user, _ := service_user.GetUserbyId(id)
 
 	c.JSON(http.StatusOK, UserResponse{
 		Response: Response{StatusCode: 0},
-		User:     *RepoUserToInfo(user),
+		User:     *RepoUserToCon(user),
 	})
 }

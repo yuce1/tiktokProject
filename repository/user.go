@@ -21,7 +21,7 @@ type User struct {
 	BackgrounImage string `json:"background_image,omitempty"`
 	Signature      string `json:"signature,omitempty"`
 	TotalFavorited int64  `json:"total_favorited,omitempty"`
-	// TODO: remove this field in db, this field should consider with other single user
+	// I want to remove this field in db, this field should consider with other single user
 	// But there is some code is using this field
 	IsFollow bool `json:"is_follow"`
 }

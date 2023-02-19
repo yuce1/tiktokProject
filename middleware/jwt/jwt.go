@@ -71,8 +71,8 @@ func Verify(c *gin.Context) {
 	var tk string
 	if tk = c.PostForm("token"); tk == "" {
 		if tk = c.Query("token"); tk == "" {
-			c.Set("TokenProvide", false)
-			return // no token provide
+			c.Set("Visitor", true)
+			return // no token provide, this mean this is a visitor
 		}
 	}
 	result, _ := NewInstance().ParseToken(tk)
@@ -85,7 +85,7 @@ func Verify(c *gin.Context) {
 		return
 	}
 
-	c.Set("TokenProvide", true)
+	c.Set("Visitor", false)
 	c.Set("UserID", result.Claims.(*Claim).User)
 
 }

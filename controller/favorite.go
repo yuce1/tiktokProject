@@ -39,7 +39,6 @@ func FavoriteAction(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "Success"})
 }
 
-// TODO: visitor request need be impl
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
 
@@ -48,7 +47,18 @@ func FavoriteList(c *gin.Context) {
 		err error
 	)
 
-	id = c.GetInt64("UserID")
+	if c.GetBool("Visitor") { // the visitor can see all favorite info
+		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: Response{
+					StatusCode: http.StatusOK,
+					StatusMsg:  "Invaild user id",
+				},
+			})
+		}
+	} else {
+		id = c.GetInt64("UserID")
+	}
 
 	favors, err := service_favor.ListByUserId(id)
 	if err != nil {
