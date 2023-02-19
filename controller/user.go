@@ -17,7 +17,7 @@ type UserLoginResponse struct {
 
 type UserResponse struct {
 	Response
-	User UserInfoResp `json:"user"`
+	User User `json:"user"`
 }
 
 func Register(c *gin.Context) {

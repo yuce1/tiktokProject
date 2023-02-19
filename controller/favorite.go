@@ -39,6 +39,7 @@ func FavoriteAction(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "Success"})
 }
 
+// TODO: visitor request need be impl
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
 

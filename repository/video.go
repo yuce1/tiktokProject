@@ -19,6 +19,7 @@ type Video struct {
 	UpdatedAt     int64  `json:"updated_at,omitempty"`
 	DeleteAt      int64  `json:"delete_at,omitempty"`
 	HashCode      string `json:"hash_code,omitempty"`
+	Title         string `json:"title,omitempty"`
 }
 
 type VideoDao struct {

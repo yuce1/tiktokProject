@@ -102,6 +102,7 @@ func Publish(c *gin.Context) {
 		PlayUrl:  videoUrl,
 		CoverUrl: coverUrl,
 		HashCode: hash_code,
+		Title:    c.PostForm("title"),
 	}
 
 	// need remove the file which insert faild?
@@ -116,6 +117,7 @@ func Publish(c *gin.Context) {
 	})
 }
 
+// TODO: visitor request need be impl
 // PublishList all users have same publish video list
 func PublishList(c *gin.Context) {
 
