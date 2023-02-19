@@ -19,7 +19,7 @@ type UserLoginResponse struct {
 
 type UserResponse struct {
 	Response
-	User UserInfoResp `json:"user"`
+	User User `json:"user"`
 }
 
 func Register(c *gin.Context) {
@@ -67,7 +67,7 @@ func UserInfo(c *gin.Context) {
 	if user, exist := service_user.GetUserByToken(token); exist {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 0},
-			User:     *RepoUserToInfo(user),
+			User:     *RepoUserToCon(user),
 		})
 	} else {
 		c.JSON(http.StatusOK, UserResponse{

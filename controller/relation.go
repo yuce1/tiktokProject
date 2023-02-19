@@ -54,6 +54,7 @@ func RelationAction(c *gin.Context) {
 	}
 }
 
+// TODO: visitor request need be impl
 // FollowList all users have same follow list
 func FollowList(c *gin.Context) {
 	useridstr := c.Query("user_id")
@@ -83,6 +84,7 @@ func FollowList(c *gin.Context) {
 	})
 }
 
+// TODO: visitor request need be impl
 // FollowerList all users have same follower list
 func FollowerList(c *gin.Context) {
 	useridstr := c.Query("user_id")
@@ -126,6 +128,8 @@ func FriendList(c *gin.Context) {
 			UserList: []User{DemoUser},
 		})
 	}
+
+	// TODO: Friend list return type was updated, need rebuild this logic
 	var respFriendList []User
 	for _, relation := range *follow_relations {
 		user, _ := repository.NewUserDaoInstance().GetUserById(relation.ToId)

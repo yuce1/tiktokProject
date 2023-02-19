@@ -17,6 +17,7 @@ type Video struct {
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
+	Title         string `json:"title,omitempty"`
 }
 
 func RepoVideoToCon(video *repository.Video) *Video {
@@ -30,6 +31,7 @@ func RepoVideoToCon(video *repository.Video) *Video {
 		CommentCount:  video.CommentCount,
 		// TODO: favourite list hasnt been develop yet
 		IsFavorite: video.IsFavorite,
+		Title:      video.Title,
 	}
 }
 
@@ -51,20 +53,38 @@ func RepoCommentToCon(comment *repository.Comment) *Comment {
 }
 
 type User struct {
-	Id            int64  `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	FollowCount   int64  `json:"follow_count,omitempty"`
-	FollowerCount int64  `json:"follower_count,omitempty"`
-	IsFollow      bool   `json:"is_follow,omitempty"`
+	Id             int64  `json:"id,omitempty"`
+	Name           string `json:"name,omitempty"`
+	FollowCount    int64  `json:"follow_count,omitempty"`
+	FollowerCount  int64  `json:"follower_count,omitempty"`
+	IsFollow       bool   `json:"is_follow,omitempty"`
+	Avatar         string `json:"avatar,omitempty"`
+	BackgrounImage string `json:"background_image,omitempty"`
+	Signature      string `json:"signature,omitempty"`
+	TotalFavorited int64  `json:"total_favorited,omitempty"`
+	WorkCount      int64  `json:"work_count,omitempty"`
+	FavoriteCount  int64  `json:"favorite_count,omitempty"`
+}
+
+type FriendUser struct {
+	User
+	Message string `json:"message,omitempty"` // 和该好友的最新聊天消息
+	MsgType int64  `json:"msgType,omitempty"` // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
 func RepoUserToCon(user *repository.User) *User {
 	return &User{
-		Id:            user.Id,
-		Name:          user.Name,
-		FollowCount:   user.FollowCount,
-		FollowerCount: user.FollowerCount,
-		IsFollow:      user.IsFollow,
+		Id:             user.Id,
+		Name:           user.Name,
+		FollowCount:    user.FollowCount,
+		FollowerCount:  user.FollowerCount,
+		IsFollow:       user.IsFollow,
+		Avatar:         user.Avatar,
+		BackgrounImage: user.BackgrounImage,
+		Signature:      user.Signature,
+		TotalFavorited: user.TotalFavorited,
+		WorkCount:      user.WorkCount,
+		FavoriteCount:  user.FavoriteCount,
 	}
 }
 
@@ -85,30 +105,3 @@ func RepoChatToMsg(cr *repository.ChatRecord) *Message {
 		CreateTime: cr.CreatedAt,
 	}
 }
-
-// a struct for query self info, due to add work_count & favorite_count fields
-type UserInfoResp struct {
-	Id            int64  `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	FollowCount   int64  `json:"follow_count,omitempty"`
-	FollowerCount int64  `json:"follower_count,omitempty"`
-	WorkCount     int64  `json:"work_count"`
-	FavoriteCount int64  `json:"favorite_count"`
-	IsFollow      bool   `json:"is_follow,omitempty"`
-}
-
-// a func turn repo.user to UserInfoResp
-func RepoUserToInfo(u *repository.User) *UserInfoResp {
-	return &UserInfoResp{
-		Id:            u.Id,
-		Name:          u.Name,
-		FollowCount:   u.FollowCount,
-		FollowerCount: u.FollowerCount,
-		WorkCount:     u.WorkCount,
-		FavoriteCount: u.FavoriteCount,
-		IsFollow:      true,
-	}
-}
-
-// maybe we can change the message struct to this Info struct, as same as the  struct in repo.
-// and in marshal, we can choose dont marshal the work_count and favorite_count field, to match the response Message struct for response.

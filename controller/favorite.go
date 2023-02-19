@@ -50,6 +50,7 @@ func FavoriteAction(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "Success"})
 }
 
+// TODO: visitor request need be impl
 // FavoriteList all users have same favorite video list
 func FavoriteList(c *gin.Context) {
 
@@ -73,7 +74,7 @@ func FavoriteList(c *gin.Context) {
 
 	u, exist := service_user.GetUserByToken(token)
 	if !exist || u.Id != id {
-		log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild. [!exist = %t, (u.ID == id) = %t]", id, !exist, u.Id != id)
+		// log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild. [!exist = %t, (u.ID == id) = %t]", id, !exist, u.Id != id)
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 2,

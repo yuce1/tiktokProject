@@ -7,17 +7,20 @@ import (
 )
 
 type User struct {
-	Id        int64  `gorm:"primary_key" json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Passwd    string `json:"passwd,omitempty"`
-	CreatedAt int64  `json:"created_at,omitempty"`
-	UpdatedAt int64  `json:"updated_at,omitempty"`
-	DeleteAt  int64  `json:"delete_at,omitempty"`
-
-	WorkCount     int64 `json:"work_count"`
-	FavoriteCount int64 `json:"favorite_count"`
-	FollowCount   int64 `json:"follow_count"`
-	FollowerCount int64 `json:"follower_count"`
+	Id             int64  `gorm:"primary_key" json:"id,omitempty"`
+	Name           string `json:"name,omitempty"`
+	Passwd         string `json:"passwd,omitempty"`
+	CreatedAt      int64  `json:"created_at,omitempty"`
+	UpdatedAt      int64  `json:"updated_at,omitempty"`
+	DeleteAt       int64  `json:"delete_at,omitempty"`
+	WorkCount      int64  `json:"work_count"`
+	FavoriteCount  int64  `json:"favorite_count"`
+	FollowCount    int64  `json:"follow_count"`
+	FollowerCount  int64  `json:"follower_count"`
+	Avatar         string `json:"avatar,omitempty"`
+	BackgrounImage string `json:"background_image,omitempty"`
+	Signature      string `json:"signature,omitempty"`
+	TotalFavorited int64  `json:"total_favorited,omitempty"`
 	// TODO: remove this field in db, this field should consider with other single user
 	// But there is some code is using this field
 	IsFollow bool `json:"is_follow"`
