@@ -17,7 +17,7 @@ services:
       - DB_USER=tiktok
       - DB_PASSWD=secret
       - DB_NAME=tiktok
-      - Host=NULL
+      - Host=http://47.115.219.21:8080
 
   postgres:
     image: postgres:15.1-alpine
