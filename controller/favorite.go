@@ -27,9 +27,9 @@ func FavoriteAction(c *gin.Context) {
 
 	switch actioType {
 	case "1":
-		err = service_favor.Do(&favour, id)
+		err = service_favor.Do(&favour, id, video)
 	case "2":
-		err = service_favor.Undo(&favour, id)
+		err = service_favor.Undo(&favour, id, video)
 	}
 
 	if err != nil {
@@ -47,17 +47,14 @@ func FavoriteList(c *gin.Context) {
 		err error
 	)
 
-	if c.GetBool("Visitor") { // the visitor can see all favorite info
-		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
-			c.JSON(http.StatusOK, UserResponse{
-				Response: Response{
-					StatusCode: http.StatusOK,
-					StatusMsg:  "Invaild user id",
-				},
-			})
-		}
-	} else {
-		id = c.GetInt64("UserID")
+	id, err = strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "Invaild user id",
+			},
+		})
 	}
 
 	favors, err := service_favor.ListByUserId(id)
@@ -73,7 +70,7 @@ func FavoriteList(c *gin.Context) {
 		return
 	}
 
-	videoIds := make([]int64, len(*favors))
+	videoIds := make([]int64, 0, len(*favors))
 	for _, f := range *favors {
 		videoIds = append(videoIds, f.VideoId)
 	}

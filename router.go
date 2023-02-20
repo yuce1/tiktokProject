@@ -4,10 +4,15 @@ import (
 	"tiktok-go/controller"
 	"tiktok-go/middleware/jwt"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
 func initRouter(r *gin.Engine) *gin.Engine {
+
+	// pprof router
+	pprof.Register(r)
+
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 

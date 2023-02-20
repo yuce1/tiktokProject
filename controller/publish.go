@@ -126,17 +126,14 @@ func PublishList(c *gin.Context) {
 		id     int64
 	)
 
-	if c.GetBool("Visitor") { // the visitor can see the publish list
-		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
-			c.JSON(http.StatusOK, UserResponse{
-				Response: Response{
-					StatusCode: http.StatusOK,
-					StatusMsg:  "Invaild user id",
-				},
-			})
-		}
-	} else {
-		id = c.GetInt64("UserID")
+	id, err = strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "Invaild user id",
+			},
+		})
 	}
 
 	u, exist := service_user.GetUserbyId(id)

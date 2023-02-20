@@ -2,10 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"tiktok-go/repository"
+	service_favor "tiktok-go/service/favorite"
 	service_video "tiktok-go/service/video"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +20,7 @@ type FeedResponse struct {
 	NextTime  int64   `json:"next_time,omitempty"`
 }
 
+// TODO: the video IsFollow field is invaild
 // Feed same demo video list for every request
 func Feed(c *gin.Context) {
 
@@ -58,6 +62,12 @@ func Feed(c *gin.Context) {
 		return
 	}
 
+	// need add favorite info
+	if !c.GetBool("Visitor") {
+		log.Println("add favorite")
+		addFavoriteInfo(c.GetInt64("UserID"), videos)
+	}
+
 	// maybe preallocate enough memory will better
 	var respVideoList []Video
 	for _, video := range *videos {
@@ -69,4 +79,19 @@ func Feed(c *gin.Context) {
 		VideoList: respVideoList,
 		NextTime:  time.Now().Unix(),
 	})
+}
+
+func addFavoriteInfo(userid int64, videos *[]repository.Video) {
+
+	favors, _ := service_favor.ListByUserId(userid)
+
+	for _, f := range *favors {
+		for i, v := range *videos {
+			if v.Id == f.VideoId {
+				(*videos)[i].IsFavorite = true
+				break
+			}
+		}
+	}
+
 }
