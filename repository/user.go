@@ -21,7 +21,7 @@ type User struct {
 	BackgrounImage string `json:"background_image,omitempty"`
 	Signature      string `json:"signature,omitempty"`
 	TotalFavorited int64  `json:"total_favorited,omitempty"`
-	// TODO: remove this field in db, this field should consider with other single user
+	// I want to remove this field in db, this field should consider with other single user
 	// But there is some code is using this field
 	IsFollow bool `json:"is_follow"`
 }
@@ -90,5 +90,17 @@ func (t *UserDao) UpdateWorkCount(userid int64, action int) error {
 func (t *UserDao) UpdateFavoriteCount(userid int64, action int) error {
 	// action must be 1 or -1
 	result := t.db.Model(&User{Id: userid}).UpdateColumn("favorite_count", gorm.Expr("favorite_count + ?", action))
+	return result.Error
+}
+
+func (t *UserDao) UpdateFollowCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("follow_count", gorm.Expr("follow_count + ?", action))
+	return result.Error
+}
+
+func (t *UserDao) UpdateFollowerCount(userid int64, action int) error {
+	// action must be 1 or -1
+	result := t.db.Model(&User{Id: userid}).UpdateColumn("follower_count", gorm.Expr("follower_count + ?", action))
 	return result.Error
 }

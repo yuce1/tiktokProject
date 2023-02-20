@@ -24,15 +24,9 @@ func Publish(c *gin.Context) {
 
 	// TODO: file path tidy
 
-	token := c.PostForm("token")
-
-	var (
-		u     *repository.User
-		exist bool
-	)
-
-	if u, exist = service_user.GetUserByToken(token); !exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+	// if there request is a Visitor request, I can't be upload
+	if c.GetBool("Visitor") {
+		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "Token not provide"})
 		return
 	}
 
@@ -67,8 +61,10 @@ func Publish(c *gin.Context) {
 		return
 	}
 
+	id := c.GetInt64("UserID")
+
 	filename := hash_code + ".mp4"
-	user, _ := service_user.GetUserByToken(token)
+	user, _ := service_user.GetUserbyId(id)
 	finalName := fmt.Sprintf("%d_%s", user.Id, filename)
 	saveFile := filepath.Join("./public/", finalName)
 	if err := c.SaveUploadedFile(data, saveFile); err != nil {
@@ -110,7 +106,7 @@ func Publish(c *gin.Context) {
 	// if err = service_video.PublishVideo(video); err != nil {
 	// upload file can overwrite, not need to processing require
 	// }
-	service_video.PublishVideo(video, u.Id)
+	service_video.PublishVideo(video, user.Id)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
@@ -126,24 +122,22 @@ func PublishList(c *gin.Context) {
 	// I will follow this: list all videos that this user published
 
 	var (
-		id     int64
 		err    error
 		videos *[]repository.Video
+		id     int64
 	)
 
-	token := c.Query("token")
-	if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
-		c.JSON(http.StatusOK, VideoListResponse{
+	id, err = strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{
 				StatusCode: 1,
 				StatusMsg:  "Invaild user id",
 			},
-			VideoList: nil,
 		})
-		return
 	}
 
-	u, exist := service_user.GetUserByToken(token)
+	u, exist := service_user.GetUserbyId(id)
 	if !exist || u.Id != id {
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{

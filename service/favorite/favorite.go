@@ -2,13 +2,13 @@ package favorite
 
 import "tiktok-go/repository"
 
-func Do(f *repository.Favorite, userid int64) error {
-	return repository.TransacCreateFavorUpdateFavorCount(f, userid, repository.ACTION_CREATE)
+func Do(f *repository.Favorite, userid int64, videoid int64) error {
+	return repository.TransacFavorRecordUpdateFavorCount(f, userid, videoid, repository.ACTION_CREATE)
 	// return repository.NewFavouriteInstance().Create(f)
 }
 
-func Undo(f *repository.Favorite, userid int64) error {
-	return repository.TransacDelFavorUpdateFavorCount(f, userid, repository.ACTION_DEL)
+func Undo(f *repository.Favorite, userid int64, videoid int64) error {
+	return repository.TransacFavorRecordUpdateFavorCount(f, userid, videoid, repository.ACTION_DEL)
 	// return repository.NewFavouriteInstance().Delete(f)
 }
 

@@ -6,7 +6,6 @@ import (
 
 	"tiktok-go/repository"
 	service_relation "tiktok-go/service/relation"
-	service_user "tiktok-go/service/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,39 +17,35 @@ type UserListResponse struct {
 
 // RelationAction no practical effect, just check if token is valid
 func RelationAction(c *gin.Context) {
-	token := c.Query("token")
+	userid := c.GetInt64("UserID")
+	touseridstr := c.Query("to_user_id")
+	touserid, _ := strconv.ParseInt(touseridstr, 10, 64)
 	actionType := c.Query("action_type")
-	if user, exist := service_user.GetUserByToken(token); exist {
-		if actionType == "1" { //Add friend
-			touseridstr := c.Query("to_user_id")
-			touserid, _ := strconv.ParseInt(touseridstr, 10, 64)
-			if repository.NewRelationDaoInstance().CheckRelation(user.Id, touserid) {
-				c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "您已经关注过该用户"})
-				return
-			} else {
-				relation := &repository.Relation{
-					FromId: user.Id,
-					ToId:   touserid,
-				}
-				service_relation.Follow(relation)
-
-				c.JSON(http.StatusOK, Response{StatusCode: 0})
-				return
-			}
+	if actionType == "1" { //Add friend
+		if repository.NewRelationDaoInstance().CheckRelation(userid, touserid) {
+			c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "您已经关注过该用户"})
+			return
 		} else {
-			touseridstr := c.Query("to_user_id")
-			touserid, _ := strconv.ParseInt(touseridstr, 10, 64)
-			if !repository.NewRelationDaoInstance().CheckRelation(user.Id, touserid) {
-				c.JSON(http.StatusOK, Response{StatusCode: 3, StatusMsg: "您已经取关该用户"})
-				return
-			} else {
-				service_relation.UnFollow(user.Id, touserid)
-				c.JSON(http.StatusOK, Response{StatusCode: 0})
-				return
+			relation := &repository.Relation{
+				FromId: userid,
+				ToId:   touserid,
 			}
+			service_relation.Follow(relation)
+
+			c.JSON(http.StatusOK, Response{StatusCode: 0})
+			return
 		}
 	} else {
-		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "User doesn't exist"})
+		touseridstr := c.Query("to_user_id")
+		touserid, _ := strconv.ParseInt(touseridstr, 10, 64)
+		if !repository.NewRelationDaoInstance().CheckRelation(userid, touserid) {
+			c.JSON(http.StatusOK, Response{StatusCode: 3, StatusMsg: "您已经取关该用户"})
+			return
+		} else {
+			service_relation.UnFollow(userid, touserid)
+			c.JSON(http.StatusOK, Response{StatusCode: 0})
+			return
+		}
 	}
 }
 
