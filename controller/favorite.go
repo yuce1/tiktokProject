@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"tiktok-go/repository"
 	service_favor "tiktok-go/service/favorite"
-	service_user "tiktok-go/service/user"
 	service_video "tiktok-go/service/video"
 
 	"github.com/gin-gonic/gin"
@@ -14,37 +13,27 @@ import (
 
 // FavoriteAction no practical effect, just check if token is valid
 func FavoriteAction(c *gin.Context) {
-	var (
-		u     *repository.User
-		exist bool
-		err   error
-	)
+	var err error
 
-	token := c.Query("token")
-
-	if u, exist = service_user.GetUserByToken(token); !exist {
-		log.Printf("[WARN] Request User (token: %s) doesn't exist", token)
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
+	id := c.GetInt64("UserID")
 
 	// are there need a video legal verify?
 
 	video, _ := strconv.ParseInt(c.Query("video_id"), 10, 64)
 
-	favour := repository.Favorite{UserId: u.Id, VideoId: video}
+	favour := repository.Favorite{UserId: id, VideoId: video}
 
 	actioType := c.Query("action_type")
 
 	switch actioType {
 	case "1":
-		err = service_favor.Do(&favour, u.Id)
+		err = service_favor.Do(&favour, id, video)
 	case "2":
-		err = service_favor.Undo(&favour, u.Id)
+		err = service_favor.Undo(&favour, id, video)
 	}
 
 	if err != nil {
-		log.Printf("[WARN] Favourite action on User[id: %d] faild, ERR: %s", u.Id, err)
+		log.Printf("[WARN] Favourite action on User[id: %d] faild, ERR: %s", id, err)
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Action faild."})
 	}
 	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "Success"})
@@ -59,33 +48,17 @@ func FavoriteList(c *gin.Context) {
 		err error
 	)
 
-	token := c.Query("token")
-	if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
-		log.Printf("[WARN] Request UserID is invaild, User[id: %d]", id)
-		c.JSON(http.StatusOK, VideoListResponse{
+	id, err = strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{
 				StatusCode: 1,
 				StatusMsg:  "Invaild user id",
 			},
-			VideoList: nil,
 		})
-		return
 	}
 
-	u, exist := service_user.GetUserByToken(token)
-	if !exist || u.Id != id {
-		// log.Printf("[WARN] User[id: %d] doesn't exist or authentication faild. [!exist = %t, (u.ID == id) = %t]", id, !exist, u.Id != id)
-		c.JSON(http.StatusOK, VideoListResponse{
-			Response: Response{
-				StatusCode: 2,
-				StatusMsg:  "User authenticate fail.",
-			},
-			VideoList: nil,
-		})
-		return
-	}
-
-	favors, err := service_favor.ListByUserId(u.Id)
+	favors, err := service_favor.ListByUserId(id)
 	if err != nil {
 		log.Printf("[WARN] User[id: %d] Fetch favourite list faild, ERR: %s.", id, err)
 		c.JSON(http.StatusOK, VideoListResponse{
@@ -98,7 +71,7 @@ func FavoriteList(c *gin.Context) {
 		return
 	}
 
-	videoIds := make([]int64, len(*favors))
+	videoIds := make([]int64, 0, len(*favors))
 	for _, f := range *favors {
 		videoIds = append(videoIds, f.VideoId)
 	}

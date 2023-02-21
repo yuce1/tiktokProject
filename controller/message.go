@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"tiktok-go/repository"
 	service_chat "tiktok-go/service/chat"
-	service_user "tiktok-go/service/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,20 +17,17 @@ type ChatResponse struct {
 
 // MessageAction no practical effect, just check if token is valid
 func MessageAction(c *gin.Context) {
-	token := c.Query("token")
+
 	toUserId := c.Query("to_user_id")
 	content := c.Query("content")
 
-	user, exist := service_user.GetUserByToken(token)
-	if !exist {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
+	id := c.GetInt64("UserID")
+
 	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
-	chatKey := service_chat.GenChatKey(user.Id, userIdB)
+	chatKey := service_chat.GenChatKey(id, userIdB)
 	curMessage := repository.ChatRecord{
 		ChatKey:    chatKey,
-		FromUserId: user.Id,
+		FromUserId: id,
 		ToUserId:   userIdB,
 		Content:    content,
 	}
@@ -46,19 +42,24 @@ func MessageAction(c *gin.Context) {
 
 // MessageChat all users have same follow list
 func MessageChat(c *gin.Context) {
-	token := c.Query("token")
+
 	toUserId := c.Query("to_user_id")
 
-	user, exist := service_user.GetUserByToken(token)
-	if !exist {
-		log.Printf("[WARN] User doesn't exist")
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
-	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
-	chatKey := service_chat.GenChatKey(user.Id, userIdB)
+	var pre_time int64
+	var err error
 
-	chatRecord, err := service_chat.GetMsgList(chatKey)
+	pre_time_str := c.Query("pre_msg_time")
+	pre_time, err = strconv.ParseInt(pre_time_str, 10, 64)
+	if err != nil {
+		pre_time = 0
+	}
+
+	id := c.GetInt64("UserID")
+
+	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
+	chatKey := service_chat.GenChatKey(id, userIdB)
+
+	chatRecord, err := service_chat.GetAddedMsg(chatKey, pre_time)
 	if err != nil {
 		log.Printf("[WARN] Fetch chat list faild. %s", err)
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Fetch chat list faild."})

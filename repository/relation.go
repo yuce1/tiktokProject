@@ -46,7 +46,7 @@ func (t *RelationDao) GetFollowList(userid int64) (*[]Relation, error) {
 
 func (t *RelationDao) GetFollowerList(userid int64) (*[]Relation, error) {
 	var relations []Relation
-	res := t.db.Where("to_id = ?", userid).Order("created_at DESC").Find(&relations)
+	res := t.db.Where("to_id = ? ", userid).Order("created_at DESC").Find(&relations)
 	return &relations, res.Error
 }
 
@@ -61,4 +61,10 @@ func (t *RelationDao) DeleteRelation(from_id int64, to_id int64) error {
 	result := t.db.Where("from_id = ? and to_id = ? ", from_id, to_id).Take(&relation)
 	t.db.Delete(&relation)
 	return result.Error
+}
+
+func (t *RelationDao) GetFriendList(userid int64) (*[]Relation, error) {
+	var relations []Relation
+	res := t.db.Where("to_id = ? ", userid).Order("created_at DESC").Find(&relations)
+	return &relations, res.Error
 }

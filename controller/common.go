@@ -16,7 +16,7 @@ type Video struct {
 	CoverUrl      string `json:"cover_url,omitempty"`
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
-	IsFavorite    bool   `json:"is_favorite,omitempty"`
+	IsFavorite    bool   `json:"is_favorite"`
 	Title         string `json:"title,omitempty"`
 }
 
@@ -29,9 +29,8 @@ func RepoVideoToCon(video *repository.Video) *Video {
 		CoverUrl:      video.CoverUrl,
 		FavoriteCount: video.FavoriteCount,
 		CommentCount:  video.CommentCount,
-		// TODO: favourite list hasnt been develop yet
-		IsFavorite: video.IsFavorite,
-		Title:      video.Title,
+		IsFavorite:    video.IsFavorite,
+		Title:         video.Title,
 	}
 }
 

@@ -42,3 +42,9 @@ func (c *ChatRecordDao) ListByKey(chatKey string) (*[]ChatRecord, error) {
 	result := c.db.Where("chat_key = ?", chatKey).Order("created_at ASC").Find(&cr)
 	return &cr, result.Error
 }
+
+func (c *ChatRecordDao) ListByKeyPretime(chatKey string, timestamp int64) (*[]ChatRecord, error) {
+	var cr []ChatRecord
+	result := c.db.Where("chat_key = ? and created_at > ?", chatKey, timestamp).Order("created_at ASC").Find(&cr)
+	return &cr, result.Error
+}
