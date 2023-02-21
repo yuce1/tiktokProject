@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile_air
     depends_on:
+      - redis
       - postgres
     ports:
       - 8080:8080
@@ -17,16 +18,25 @@ services:
       - DB_USER=tiktok
       - DB_PASSWD=secret
       - DB_NAME=tiktok
-      - Host=http://47.115.219.21:8080
+      - RDB_HOST=redis
+      - Host=http://47.113.179.123:8080
 
   postgres:
-    image: postgres:15.1-alpine
+    build: 
+      context: .
+      dockerfile: Dockerfile_postgre
+    depends_on:
+      - redis
     volumes:
       - tiktok-go-pg-data:/var/lib/postgresql/data
+      - ./repository/sql:/tmp
     environment:
       - POSTGRES_USER=tiktok
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=tiktok
+  
+  redis:
+    image: redis:latest
 
 volumes:
   tiktok-go-pg-data:

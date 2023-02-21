@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -64,7 +63,6 @@ func Feed(c *gin.Context) {
 
 	// need add favorite info
 	if !c.GetBool("Visitor") {
-		log.Println("add favorite")
 		addFavoriteInfo(c.GetInt64("UserID"), videos)
 	}
 

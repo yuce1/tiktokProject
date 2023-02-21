@@ -1,0 +1,18 @@
+FROM postgres:alpine3.17
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
+    apk update &&\
+    set -eux && \
+    apk add hiredis && \
+    apk add --no-cache --virtual .build-deps hiredis-dev gcc libc-dev clang llvm unzip make && \
+    wget https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/rw_redis_fdw-master.zip && \
+    unzip rw_redis_fdw-master.zip && cd rw_redis_fdw-master && \
+    make && make install && \
+    apk del --no-network .build-deps && \
+    rm -f rw_redis_fdw-master.zip;
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 5432
+
+CMD ["postgres"]

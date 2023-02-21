@@ -45,12 +45,21 @@ func MessageChat(c *gin.Context) {
 
 	toUserId := c.Query("to_user_id")
 
+	var pre_time int64
+	var err error
+
+	pre_time_str := c.Query("pre_msg_time")
+	pre_time, err = strconv.ParseInt(pre_time_str, 10, 64)
+	if err != nil {
+		pre_time = 0
+	}
+
 	id := c.GetInt64("UserID")
 
 	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
 	chatKey := service_chat.GenChatKey(id, userIdB)
 
-	chatRecord, err := service_chat.GetMsgList(chatKey)
+	chatRecord, err := service_chat.GetAddedMsg(chatKey, pre_time)
 	if err != nil {
 		log.Printf("[WARN] Fetch chat list faild. %s", err)
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Fetch chat list faild."})

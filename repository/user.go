@@ -3,6 +3,7 @@ package repository
 import (
 	"sync"
 
+	"github.com/go-redis/redis"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +36,8 @@ func NewUser() *User {
 }
 
 type UserDao struct {
-	db *gorm.DB
+	db  *gorm.DB
+	rdb *redis.Client
 }
 
 var (
