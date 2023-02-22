@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -123,15 +124,18 @@ func FriendList(c *gin.Context) {
 			UserList: []User{DemoUser},
 		})
 	}
+	log.Printf("%v", follow_relations)
 
 	// TODO: Friend list return type was updated, need rebuild this logic
 	var respFriendList []User
 	for _, relation := range *follow_relations {
 		user, _ := repository.NewUserDaoInstance().GetUserById(relation.ToId)
-		if repository.NewRelationDaoInstance().CheckRelation(userid, relation.FromId) {
+		log.Printf("fromid: %d  ,  toid: %d", userid, relation.FromId)
+		if repository.NewRelationDaoInstance().CheckRelation(relation.ToId, userid) {
 			respFriendList = append(respFriendList, *RepoUserToCon(user))
 		}
 	}
+	log.Printf("%v", respFriendList)
 	c.JSON(http.StatusOK, UserListResponse{
 		Response: Response{
 			StatusCode: 0,
