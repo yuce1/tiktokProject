@@ -19,7 +19,7 @@ services:
       - DB_PASSWD=secret
       - DB_NAME=tiktok
       - RDB_HOST=redis
-      - Host=http://47.113.179.123:8080
+      - Host=localhost:8080
 
   postgres:
     build: 

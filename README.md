@@ -2,6 +2,29 @@
 
 基于postgres+redis+gorm+gin+jwt搭建的简易tiktok抖声服务端
 
+# 部署
+
+在docker-compose中，app的Host环境变量填写为**自己的服务器地址**。例如: `Host:http://33.123.212.64:8080`。如果地址格式不正确或不可用，将会影响视频的上传和读取。在根目录创建public文件夹（如果没有的话）。
+
+随后服务可以通过以下指令启动:
+
+```
+sudo docker-compose up
+```
+
+如果你的Host填写错误，且已经启动服务并上传了视频，请进入postgres的docker容器中，删除对应的videos数据表。postgres的用户为`tiktok`:
+
+```
+psql -U tiktok
+drop table videos;
+```
+
+随后重新构建docker启动：
+
+```
+sudo docker-compose up --build
+```
+
 # 技术选型
 
 ![选型](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/%E9%80%89%E5%9E%8B.png)
