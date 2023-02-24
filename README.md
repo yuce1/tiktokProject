@@ -1,69 +1,101 @@
 # tiktokProject
 
-极简抖音app开发
+基于postgres+redis+gorm+gin+jwt搭建的简易tiktok抖声服务端
 
-```shell
-go build && ./simple-demo
+# 技术选型
+
+![选型](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/boxcn7LA3yDTtT5z10yRb7RlWpb/?fallback_source=1&height=1280&mount_node_token=LYGSdQweMoaCWqxYv2xc43e8nZc&mount_point=docx_image&policy=equal&width=1280)
+
+# 架构
+
+![架构](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/boxcn5wOvB0XCL2kjSYqRgxQpUf/?fallback_source=1&height=1280&mount_node_token=JQkWdAKAEooSccx5slKc3S4fnqr&mount_point=docx_image&policy=equal&width=1280)
+
+按照上方架构图进行设计。暂时只考虑了平流情况。对于突增流量可以在redis中添加对应的短期缓存。写入请求可以使用redis作为消息队列进行缓存，从而缓解数据库写入压力。
+
+# 数据库
+
+![ER](blob:https://yrswyur8nn.feishu.cn/3bd32913-d1fe-44cd-af9e-5cabd1f61e64)
+
+# Redis
+
+![结构](blob:https://yrswyur8nn.feishu.cn/d2d6ec6e-c3b5-4141-b006-251d08e84ea4)
+
+0号数据库用于存储user信息和video信息。1号数据存储和video有关系的数据。2号数据库存储和user有关系的数据。
+
+![索引结构关系](blob:https://yrswyur8nn.feishu.cn/13225017-8a15-4613-a0d2-89bd0cd024b8)
+
+类似的`user_favorite_{user_id}, user_follow_{user_id}. user_follower_{user_id}`也是如此索引方法。他们不保存具体的对象信息而是保存对象的key。通过这个key到指定的数据库再去获取对象的json。可以提高系统的灵活性，降低操作的次数。
+
+# 代码结构
+
+```
+.
+├── controller
+│   ├── comment.go // comment api handle                
+│   ├── common.go // 保存基础结构，以及基础结构和数据库结构之间的转换方法                 
+│   ├── demo_data.go
+│   ├── favorite.go // favorite api handle
+│   ├── feed.go // video stream api handle
+│   ├── message.go // message api handle
+│   ├── publish.go // pulish api and user publish video api handle
+│   ├── relation.go // relation api handle
+│   └── user.go // user api handle
+├── docker-compose.yml // docker-compose配置文件
+├── Dockerfile_air // 开发环境构建使用的Dockerfile
+├── Dockerfile_postgre // 构建Postgres with rw-redis_fdw使用的Dockerfile
+├── go.mod
+├── go.sum
+├── LICENSE
+├── log.txt // 系统运行产生的日志文件
+├── main.go // 程序入口
+├── Makefile
+├── middleware
+│   ├── jwt
+│   │   └── jwt.go // jwt中间件实现
+│   └── redis
+│       └── redis.go // redis中间件实现
+├── public // 用于保存上传的视频和生成的封面图片
+├── README.md
+├── repository
+│   ├── chat.go // message表与DAO
+│   ├── comment.go // comment表与DAO
+│   ├── db_init.go // 数据库初始化流程操作
+│   ├── favorite.go // favorite表与DAO
+│   ├── relation.go // relation表与DAO
+│   ├── sql
+│   │   └── redis_fdw_init.sql // postgres 初始化redis_fdw，外表建立以及对应触发器建立
+│   ├── transcation.go // 多表事务
+│   ├── user.go // user表与DAO
+│   └── video.go // video表与DAO
+├── router.go // 路由配置
+├── service
+│   ├── chat
+│   │   └── chat.go // 向上提供的关于message的服务
+│   ├── comment
+│   │   └── comment.go // 向上提供的关于comment的服务
+│   ├── favorite
+│   │   └── favorite.go // 向上提供的关于favorite的服务
+│   ├── message.go
+│   ├── relation
+│   │   └── relation.go // 向上提供的关于relation的服务
+│   ├── user
+│   │   └── user.go // 向上提供的关于user的服务
+│   └── video
+│       └── video.go // 向上提供的关于video的服务
+├── test
+│   ├── base_api_test.go
+│   ├── common.go
+│   ├── interact_api_test.go
+│   ├── message_server_test.go
+│   ├── social_api_test.go
+│   └── test.md
+└── utils
+    ├── cover.go // 提供生成视频封面的功能
+    └── log.go // 提供日志flag初始化的功能
 ```
 
-### 功能说明
+# 测试
 
-* 用户登录数据保存在内存中，单次运行过程中有效
-* 视频上传后会保存到本地 public 目录中，访问时用 127.0.0.1:8080/static/video_name 即可
+测试结果见`./test/test.md`
 
-### 测试
-
-test 目录下为不同场景的功能测试case，可用于验证功能实现正确性
-
-- common.go 中的 _serverAddr_ 为服务部署的地址，默认为本机地址，可以根据实际情况修改
-- 测试数据写在 demo_data.go 中，用于列表接口的 mock 测试
-
-Fork from [RaymondCode/simple-demo](https://tiktok-go)
-
-### Android App
-
-`public/app-release.apk` 设置服务端地址
-为方便测试登录和注册，及修改网络请求的服务器地址，提供了退出登录和高级设置两个能力。
-
-1. 点击退出登录会自动重启
-2. 在高级设置中可以配置自己的服务端项目的前缀地址，如下配置的http://192.168.1.7:8080
-   在app中访问上述某个接口时就会拼接该前缀地址，例如访问 http://192.168.1.7:8080/douyin/feed/ 拉取视频列表
-
-在未登录情况下，双击右下角的 “我” 可以 打开高级设置
-
-# Notice
-
-在docker-compose.yml中的Host环境变量写入你的服务器地址。
-
-# API完成情况
-
-接口文档： [极简版抖音](https://www.apifox.cn/apidoc/shared-09d88f32-0b6c-4157-9d07-a36d32d7a75c/)
-
-基础接口：
-
-* 视频流接口   已完成，测试成功
-* 用户注册     已完成，测试成功
-* 用户登录     已完成，测试成功
-* 用户信息     已完成，测试成功
-* 投稿接口     已完成，测试成功
-* 发布列表     已完成，测试成功
-
-ALL PASS
-
-互动接口：
-
-* 赞操作       已完成，测试成功
-* 喜欢列表     已完成，测试成功
-* 评论操作     已完成，测试成功
-* 评论列表     已完成，测试成功
-
-社交接口：
-
-* 关注操作     已完成，测试成功
-* 关注列表     已完成，测试成功
-* 粉丝列表     已完成，测试成功
-* 好友列表     已完成，bug修复
-* 发送消息     已完成，测试成功
-* 聊天记录     已完成，测试成功
-
-测试记录，见test/test.md
+api测试全部通过。

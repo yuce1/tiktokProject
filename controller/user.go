@@ -71,17 +71,18 @@ func UserInfo(c *gin.Context) {
 		err error
 	)
 
-	if c.GetBool("Visitor") { // the visitor can see all the info in person page
-		if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
-			c.JSON(http.StatusOK, UserResponse{
-				Response: Response{
-					StatusCode: http.StatusOK,
-					StatusMsg:  "Invaild user id",
-				},
-			})
-		}
-	} else {
-		id = c.GetInt64("UserID")
+	// if c.GetBool("Visitor") { // the visitor can see all the info in person page
+	// } else {
+	// 	id = c.GetInt64("UserID")
+	// }
+
+	if id, err = strconv.ParseInt(c.Query("user_id"), 10, 64); err != nil {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{
+				StatusCode: http.StatusOK,
+				StatusMsg:  "Invaild user id",
+			},
+		})
 	}
 
 	user, _ := service_user.GetUserbyId(id)

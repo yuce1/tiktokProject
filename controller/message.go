@@ -23,7 +23,12 @@ func MessageAction(c *gin.Context) {
 
 	id := c.GetInt64("UserID")
 
-	userIdB, _ := strconv.ParseInt(toUserId, 10, 64)
+	userIdB, err := strconv.ParseInt(toUserId, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "Invaild user id"})
+		return
+	}
+
 	chatKey := service_chat.GenChatKey(id, userIdB)
 	curMessage := repository.ChatRecord{
 		ChatKey:    chatKey,
@@ -31,7 +36,7 @@ func MessageAction(c *gin.Context) {
 		ToUserId:   userIdB,
 		Content:    content,
 	}
-	err := service_chat.SaveMsg(&curMessage)
+	err = service_chat.SaveMsg(&curMessage)
 	if err != nil {
 		c.JSON(http.StatusOK, Response{StatusCode: 2, StatusMsg: "Save chat record faild."})
 		return

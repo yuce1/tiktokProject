@@ -91,5 +91,4 @@ func addFavoriteInfo(userid int64, videos *[]repository.Video) {
 			}
 		}
 	}
-
 }
