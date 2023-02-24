@@ -4,25 +4,25 @@
 
 # 技术选型
 
-![选型](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/boxcn7LA3yDTtT5z10yRb7RlWpb/?fallback_source=1&height=1280&mount_node_token=LYGSdQweMoaCWqxYv2xc43e8nZc&mount_point=docx_image&policy=equal&width=1280)
+![选型](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/%E9%80%89%E5%9E%8B.png)
 
 # 架构
 
-![架构](https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/v2/cover/boxcn5wOvB0XCL2kjSYqRgxQpUf/?fallback_source=1&height=1280&mount_node_token=JQkWdAKAEooSccx5slKc3S4fnqr&mount_point=docx_image&policy=equal&width=1280)
+![架构](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/%E6%9E%B6%E6%9E%84.png)
 
 按照上方架构图进行设计。暂时只考虑了平流情况。对于突增流量可以在redis中添加对应的短期缓存。写入请求可以使用redis作为消息队列进行缓存，从而缓解数据库写入压力。
 
 # 数据库
 
-![ER](blob:https://yrswyur8nn.feishu.cn/3bd32913-d1fe-44cd-af9e-5cabd1f61e64)
+![ER](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/ER.jpg)
 
 # Redis
 
-![结构](blob:https://yrswyur8nn.feishu.cn/d2d6ec6e-c3b5-4141-b006-251d08e84ea4)
+![结构](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/redis.jpg)
 
 0号数据库用于存储user信息和video信息。1号数据存储和video有关系的数据。2号数据库存储和user有关系的数据。
 
-![索引结构关系](blob:https://yrswyur8nn.feishu.cn/13225017-8a15-4613-a0d2-89bd0cd024b8)
+![索引结构关系](https://lanpesk-package-proxy.obs.cn-north-4.myhuaweicloud.com/%E7%B4%A2%E5%BC%95.jpg)
 
 类似的`user_favorite_{user_id}, user_follow_{user_id}. user_follower_{user_id}`也是如此索引方法。他们不保存具体的对象信息而是保存对象的key。通过这个key到指定的数据库再去获取对象的json。可以提高系统的灵活性，降低操作的次数。
 
